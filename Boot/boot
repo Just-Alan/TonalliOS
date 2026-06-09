@@ -1,1 +1,46 @@
-print ("welcome to TonalliOS. Initializing report")
+import time, subprocess
+
+text = "\033[38;5;214m" + "This is a test hello test very good test sir yes oh yes!ffffddsdsdadasddsgaabsfasdbabfdsbadfabdabdfabdbadbadfabdfbdfadbafabdfabfddabafbdafbdbdfabdabdfafbdadfbadfbsabdfabdfwbdf" + "\033[0m"
+Enter = "\033[38;5;214m" + "Press Enter to continue" + "\033[0m"
+Hello = "\033[38;5;214m" + "Welcome to TonalliOS" + "\033[0m"
+
+
+for char in text:
+    print(char, end="", flush=True)
+    time.sleep(0.015)  
+print() 
+
+time.sleep(0.1)
+
+def Enter_button():
+    for char in Enter:
+        print(char, end="", flush=True)
+        time.sleep(0.015)  
+print() 
+
+def Enter_button_logic(text):
+    for char in text:
+        print(char, end="", flush=True)
+        time.sleep(0.015)
+    return input()
+
+Enter_button_logic("\033[38;5;214m" + "Hello thi is test very nice" + "\033[0m")
+
+def clean():
+    print("\033[2J\033[H\033[3J", end ="", flush=True)
+
+    for char in ("\033[38;5;214m" + "Hello this is test very nice" + "\033[0m"):
+        print(char, end="", flush=True)
+        time.sleep(0.015) 
+    print()
+
+
+for char in Hello:
+    print(char, end="", flush=True)
+    time.sleep(0.1)  
+print()
+time.sleep(0.2)
+clean()
+time.sleep(1)
+
+subprocess.run(["/Users/usuario/TonalliOS/Menu/Menu"])
