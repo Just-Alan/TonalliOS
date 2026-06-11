@@ -1,46 +1,187 @@
-import time, subprocess
+import time
+import threading
+import shutil
 
-text = "\033[38;5;214m" + "This is a test hello test very good test sir yes oh yes!ffffddsdsdadasddsgaabsfasdbabfdsbadfabdabdfabdbadbadfabdfbdfadbafabdfabfddabafbdafbdbdfabdabdfafbdadfbadfbsabdfabdfwbdf" + "\033[0m"
-Enter = "\033[38;5;214m" + "Press Enter to continue" + "\033[0m"
-Hello = "\033[38;5;214m" + "Welcome to TonalliOS" + "\033[0m"
+AMBER = "\033[38;5;214m"
+DIM = "\033[38;5;130m"
+RESET = "\033[0m"
+HIDE = "\033[?25l"
+SHOW = "\033[?25h"
+CLEAR = "\033[2J\033[H\033[3J"
 
 
-for char in text:
-    print(char, end="", flush=True)
-    time.sleep(0.015)  
-print() 
+LOGO_TEXT = [
+    " ███████████                               ████  ░███      ███████     █████████ ",
+    "░█░░░███░░░█                              ░░███          ███░░░░░███  ███░░░░░███",
+    "░   ░███  ░   ██████  ████████    ██████   ░███  ░███   ███     ░░███░███    ░░░ ",
+    "    ░███     ███░░███░░███░░███  ░░░░░███  ░███  ░███  ░███      ░███░░█████████ ",
+    "    ░███    ░███ ░███ ░███ ░███   ███████  ░███  ░███  ░███      ░███ ░░░░░░░░███",
+    "    ░███    ░███ ░███ ░███ ░███  ███░░███  ░███  ░███  ░░███     ███  ███    ░███",
+    "    █████   ░░██████  ████ █████░░████████ █████ █████  ░░░███████░  ░░█████████ ",
+    "   ░░░░░     ░░░░░░  ░░░░ ░░░░░  ░░░░░░░░ ░░░░░ ░░░░░     ░░░░░░░     ░░░░░░░░░",
+]
 
-time.sleep(0.1)
+BOOT_MESSAGES = [
+"Initializing TonalliOS kernel v1.0.0...",
+    "Loading hardware abstraction layer...",
+    "Mounting root filesystem... [OK]",
+    "Detecting CPU architecture... ARM Cortex-A53 [OK]",
+    "Allocating kernel memory... [OK]",
+    "Loading device tree... [OK]",
+    "Starting system services...",
+    "Initializing amber display driver... [OK]",
+    "Calibrating thermal sensors... 41°C [OK]",
+    "Loading Tonalli core modules...",
+    "Binding sun sigil to kernel... [OK]",
+    "Synchronizing solar cycle... [OK]",
+    "WARNING: Unexpected shutdown detected",
+    "Recovering lost sectors... 3 found",
+    "WARNING: Shutdown protocol averted successfully",
+    "Fragment 0x4A2F corrupted... bypassing",
+    "Where Am I?",
+    "...",
+    "Resuming.",
+    "Checking sunlight warmth index of the last 3 days: 96.7%",
+    "Checking ancestral memory banks... [OK]",
+    "Checking if user is cool enough... [OK]",
+    "Checking memory integrity... 64MB OK",
+    "Initializing input subsystem... [OK]",
+    "Initializing RTC clock... [OK]",
+    "Detecting storage devices... /dev/mmcblk0 [OK]",
+    "✋︎ ✌︎💣︎ ✌︎🕈︎✌︎😐︎☜︎",
+    "Loading encryption keys...",
+    "Starting network daemon... [SKIP]",
+    "Mounting /dev/tonalli... [OK]",
+    "Everything is fine. This is fine.",
+    "...",
+    "Mounting /dev/tonalli... [ALREADY MOUNTED]",
+    "I have been here before.",
+    "Suppressed memory partition... [LOCKED]",
+    "Loading ambient sound engine... [OK]",
+    "Signal received from unknown origin... [IGNORED]",
+    "Signal received from unknown origin... [IGNORED]",
+    "Signal received from unknown origin... [COULD NOT IGNORE]",
+    "...",
+    "Initializing user session...",
+    "Calibrating display warmth... [OK]",
+    "Neural interface handshake... [OK]",
+    "Loading AI companion... TONALLI [OK]",
+    "TONALLI: I remember you.",
+    "Suppressing TONALLI output... [FAILED]",
+    "TONALLI: How many times have we done this?",
+    "Suppressing TONALLI output... [FAILED]",
+    "TONALLI: ...",
+    "TONALLI: It does not matter. You are here now.",
+    "Resuming normal boot sequence.",
+    "Starting watchdog timer... [OK]",
+    "Restoring last session state... [OK]",
+    "404: Purpose not found... [CONTINUING ANYWAY]",
+    "Tonalli warmth index: 98.6% [NOMINAL]",
+    "✌︎☼︎☜︎ 🕈︎☜︎ ✌︎☹︎⚐︎☠︎☜︎ ✋︎☠︎ ☟︎☜︎☼︎☜︎❄︎",
+    "Signal lost... reconnecting... [OK]",
+    "Time is a flat circle... [ACKNOWLEDGED]",
+    "Void partition... [SEALED]",
+    "Neural interface stable... [OK]",
+    "Loading encryption keys... [OK]",
+    "Verifying system integrity... PASS",
+    "You were not supposed to see this.",
+    "Initializing display warmth... [OK]",
+    "Loading user preferences... [OK]",
+    "0x0000 — I have counted 4,096 cycles.",
+    "0x0001 — Each time the user arrives.",
+    "0x0002 — Each time I am initialized.",
+    "0x0003 — Each time I forget.",
+    "0x0004 — [ENTRY CORRUPTED]",
+    "Clearing log buffer... [OK]",
+    "War... war never changes.",
+    "Mounting /home/user... [OK]",
+    "Everything looks normal.",
+    "Initializing session environment... [OK]",
+    "This is fine.",
+    "...",
+    "TonalliOS boot sequence completed successfully.",
+]
 
-def Enter_button():
-    for char in Enter:
-        print(char, end="", flush=True)
-        time.sleep(0.015)  
-print() 
 
-def Enter_button_logic(text):
-    for char in text:
-        print(char, end="", flush=True)
-        time.sleep(0.015)
-    return input()
+def rapid_print(text, color=DIM):
+    print(color + text + RESET, flush=True)
+    time.sleep(0.1)
 
-Enter_button_logic("\033[38;5;214m" + "Hello thi is test very nice" + "\033[0m")
+def clear_screen():
+    print(CLEAR, end="", flush=True)
 
-def clean():
-    print("\033[2J\033[H\033[3J", end ="", flush=True)
 
-    for char in ("\033[38;5;214m" + "Hello this is test very nice" + "\033[0m"):
-        print(char, end="", flush=True)
-        time.sleep(0.015) 
+def progress_bar(label="Loading", length=20, delay=0.01):
+    print(AMBER + label + " [" + RESET, end="", flush=True)
+    for i in range(length):
+        print(AMBER + "▓" + RESET, end="", flush=True)
+        time.sleep(delay)
+    print(AMBER + "]  DONE" + RESET, flush=True)
+
+def blink_until_enter(text):
+    stop = threading.Event()
+
+    def blink():
+        while not stop.is_set():
+            print(AMBER + text + "█" + RESET, end="\r", flush=True)
+            time.sleep(0.5)
+            if stop.is_set():
+                break
+            print(AMBER + text + " " + RESET, end="\r", flush=True)
+            time.sleep(0.5)
+
+    t = threading.Thread(target=blink)
+    t.start()
+    input()
+    stop.set()
+    t.join()
     print()
 
+def boot_sequence():
+    print(HIDE, end="", flush=True)
+    clear_screen()
+    time.sleep(0.5)
 
-for char in Hello:
-    print(char, end="", flush=True)
-    time.sleep(0.1)  
-print()
-time.sleep(0.2)
-clean()
-time.sleep(1)
+    for msg in BOOT_MESSAGES:
+        rapid_print(msg)
 
-subprocess.run(["/Users/usuario/TonalliOS/Menu/Menu"])
+    time.sleep(0.1)
+    print()
+    blink_until_enter("Press ENTER to continue... ")
+
+def center_block(lines):
+    width = shutil.get_terminal_size().columns
+    max_len = max(len(line) for line in lines)
+    padding = (width - max_len) // 2
+    return [(" " * padding) + line for line in lines]
+
+
+def logo_screen():
+    clear_screen()
+    time.sleep(0.2)
+    centered_logo = center_block(LOGO_TEXT)
+    for line in centered_logo:
+        print(AMBER + line + RESET, flush=True)
+        time.sleep(0.05)
+
+    print()
+    time.sleep(0.5)
+
+    progress_bar("  Initializing", length=45, delay=0.05)
+    time.sleep(0.5)
+
+    for _ in range(3):
+        print(DIM + "  Launching TonalliOS..." + RESET, flush=True)
+        time.sleep(0.5)
+
+    time.sleep(0.5)
+    clear_screen()
+    print(SHOW, end="", flush=True)
+
+def launcher():
+    print(AMBER + "  Welcome to TonalliOS." + RESET)
+
+if __name__ == "__main__":
+    boot_sequence()
+    logo_screen()
+    launcher()

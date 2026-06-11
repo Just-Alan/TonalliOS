@@ -1,4 +1,4 @@
 # TonalliOS
-The project is to make a simple yet effective operating system to run in a raspberry PI for a cyberdeck build. The features added to the operating system will be updated in this README document. The goal of this project honestly is to just have fun messing around and seeing what I can do for summer.
+The project is to make a simple yet effective operating system to run in a raspberry PI for a cyberdeck build. The features added to the operating system will be updated in this README document. The goal of this project honestly is to just have fun messing around and seeing what I can do for summer. It is basically a small scale Fallou inspired program that runs natively on a terminal. 
 List of features:
 
