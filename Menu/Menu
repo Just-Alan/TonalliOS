@@ -1,2 +1,17 @@
-print("hello world!")
+import time
+import threading
+import shutil
+import termios
+import sys
+import subprocess
+
+AMBER = "\033[38;5;214m"
+DIM = "\033[38;5;130m"
+RESET = "\033[0m"
+HIDE = "\033[?25l"
+SHOW = "\033[?25h"
+CLEAR = "\033[2J\033[H\033[3J"
+
+
+print(AMBER + "hello world!")
 
